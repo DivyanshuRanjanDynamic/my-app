@@ -1,23 +1,10 @@
 import NextAuth from "next-auth";
-import {PrismaAdapter} from "@auth/prisma-adapter";
-import {db} from "./lib/db";
+import { PrismaAdapter } from "@auth/prisma-adapter";
+import { db } from "./lib/db";
 import authConfig from "./auth.config";
 import { getAccountByUserId, getUserById } from "@/features/auth/action/index";
 
-// Test database connection
-async function testDatabaseConnection() {
-  try {
-    await db.$connect();
-    console.log("✅ Database connection successful");
-    return true;
-  } catch (error) {
-    console.error("❌ Database connection failed:", error);
-    return false;
-  }
-}
 
-// Test the connection on startup
-testDatabaseConnection();
 
  export const { handlers, signIn, signOut, auth } = NextAuth({
     callbacks : {
@@ -123,23 +110,22 @@ testDatabaseConnection();
                     return token;
                   },
 
-                  async session({ session, token }) {
-                    // Attach the user ID from the token to the session
-                  if(token.sub  && session.user){
-                    session.user.id = token.sub
-                  } 
-              
-                  if(token.sub && session.user){
-                    session.user.role = token.role
-                  }
-              
-                  return session;
-                  },
+    async session({ session, token }) {
+      // Attach the user ID from the token to the session
+      if (token.sub && session.user) {
+        session.user.id = token.sub;
+      }
+
+      if (token.sub && session.user) {
+        session.user.role = token.role;
+      }
+
+      return session;
     },
+  },
 
-    secret: process.env.AUTH_SECRET,
-    adapter: PrismaAdapter(db),
-    session : {strategy : "jwt"},
-    ...authConfig
-
-  });
+  secret: process.env.AUTH_SECRET,
+  adapter: PrismaAdapter(db),
+  session: { strategy: "jwt" },
+  ...authConfig,
+});
